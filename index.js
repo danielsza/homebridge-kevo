@@ -20,8 +20,17 @@ function KevoAccessory(log, config) {
   this.password = config["password"];
   this.lockId = config["lock_id"];
   this.lockOrder = lockOrder++;
+  this.serialNumber = config["serialNumber"];
 
-  this.service = new Service.LockMechanism(this.name);
+
+   this.informationService = new Service.AccessoryInformation();
+   this.informationService
+       .setCharacteristic(Characteristic.Manufacturer, 'Homebridge')
+       .setCharacteristic(Characteristic.Model, 'Kevo')
+       .setCharacteristic(Characteristic.SerialNumber, this.serialNumber);
+
+   this.service = new Service.LockMechanism(this.name);
+
   
   this.service
     .getCharacteristic(Characteristic.LockCurrentState)
@@ -36,6 +45,11 @@ function KevoAccessory(log, config) {
   
   this._setup();
 }
+
+KevoAccessory.prototype.getServices = function() {
+   return [this.informationService, this.service];
+ }
+
 
 KevoAccessory.prototype._setup = function() {
   this._login(function(err) {
@@ -295,8 +309,4 @@ KevoAccessory.prototype.setState = function(state, callback) {
   
   }.bind(this));
 
-}
-
-KevoAccessory.prototype.getServices = function() {
-  return [this.service];
 }
